@@ -11,7 +11,7 @@ namespace Challenges
     public class Item
     {
         public int ItemId { get; }
-        public int Owner { get; }
+        public int Owner { get; private set; }
         public string Name { get; set; }
         public int Price { get; set; }
         public string Description { get; set; }
@@ -33,5 +33,13 @@ namespace Challenges
         {
             return this.DateListed.Humanize();
         }
+
+        public int ReassignOwner(User user)
+        {
+            this.Owner = user.UserId;
+            return this.Owner;
+        }
+
+        public static void ResetItemsCount() => ItemsCreated = 0;
     }
 }

@@ -72,12 +72,12 @@ namespace Challenges.Tests
         {
             User testUser = new User("testUser", "test@northcoders.com");
 
-            Item firstItem = testUser.ListItem("testItemName1", 20, "test description1");
-            Item firstItemForSale = testUser.ItemsForSale[0];
+            Item firstItem = Market.ListItem(new Item(testUser, "newTestItem", 20, "test description1"));
+            Item firstItemForSale = Market.AllItems[0];
             firstItemForSale.Should().Be(firstItem);
 
-            Item secondItem = testUser.ListItem("testItemName2", 20, "test description2");
-            Item secondItemForSale = testUser.ItemsForSale[1];
+            Item secondItem = Market.ListItem(new Item(testUser, "newTestItem2", 20, "test description2"));
+            Item secondItemForSale = Market.AllItems[1];
             secondItemForSale.Should().Be(secondItem);
         }
 
@@ -88,9 +88,9 @@ namespace Challenges.Tests
             User buyer = new User("testUser1", "test@northcoders.com");
             User seller = new User("testUser2", "test@northcoders.com");
             buyer.UpdateBalance(50);
-            seller.ListItem("testItemName", 20, "test description");
-            Item testItem = seller.ItemsForSale[0];
-            buyer.PurchaseItem(testItem, seller).Should().Be(User.PurchaseResult.SUCCESS);
+            Market.ListItem(new Item(seller, "newTestItem", 20, "test description1"));
+            Item testItem = Market.AllItems[0];
+            Market.PurchaseItem(testItem, buyer, seller).Should().Be(Market.PurchaseResult.SUCCESS);
             buyer.Balance.Should().Be(30);
         }
 
@@ -99,15 +99,15 @@ namespace Challenges.Tests
         public void _9PurchaseItemWithoutFundsTest()
         {
             User seller = new User("testUser1", "test1@northcoders.com");
-            Item item = seller.ListItem("testItemName1", 20, "test description1");
+            Item item = Market.ListItem(new Item(seller, "newTestItem", 20, "test description1"));
 
             User buyer = new User("testUser2", "test2@northcoders.com");
 
-            buyer.PurchaseItem(item, seller).Should().Be(User.PurchaseResult.INSUFFICIENT_FUNDS);
+            Market.PurchaseItem(item, buyer, seller).Should().Be(Market.PurchaseResult.INSUFFICIENT_FUNDS);
 
             buyer.UpdateBalance(50);
 
-            buyer.PurchaseItem(item, seller).Should().Be(User.PurchaseResult.SUCCESS);
+            Market.PurchaseItem(item, buyer, seller).Should().Be(Market.PurchaseResult.SUCCESS);
         }
 
 
@@ -116,8 +116,8 @@ namespace Challenges.Tests
         {
             User seller = new User("testUser1", "test1@northcoders.com");
             seller.UpdateBalance(50);
-            Item item = seller.ListItem("testItemName1", 20, "test description1");
-            seller.PurchaseItem(item, seller).Should().Be(User.PurchaseResult.ALREADY_OWNED);
+            Item item = Market.ListItem(new Item(seller, "newTestItem", 20, "test description1"));
+            Market.PurchaseItem(item, seller, seller).Should().Be(Market.PurchaseResult.ALREADY_OWNED);
         }
 
         [Test]
@@ -126,9 +126,9 @@ namespace Challenges.Tests
             User buyer = new User("testbuyer", "testbuyeremail1@test.com");
             buyer.UpdateBalance(50);
             User seller = new User("testseller", "testselleremail1@test.com");
-            Item item = seller.ListItem("testItem", 10, "description");
-            buyer.PurchaseItem(item, seller);
-            seller.ItemsForSale.Should().NotContain(item);
+            Item item = Market.ListItem(new Item(seller, "newTestItem", 10, "description"));
+            Market.PurchaseItem(item, buyer, seller);
+            Market.AllItems.Should().NotContain(item);
         }
 
         [Test]
@@ -146,6 +146,7 @@ namespace Challenges.Tests
         [Test]
         public void _12ItemIdTest()
         {
+            Item.ResetItemsCount();
             Item item1 = new Item(new User("test1", "test1@test.com"), "nametest1", 12, "test1@test.com");
             Item item2 = new Item(new User("test2", "test2@test.com"), "nametest2", 12, "test2@test.com");
             Item item3 = new Item(new User("test3", "test3@test.com"), "nametest3", 12, "test3@test.com");
