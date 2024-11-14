@@ -12,11 +12,18 @@ namespace Challenges
         public static List<Item> AllItems { get; private set; } = new List<Item>();
         public static List<Item> SoldItems { get; private set; } = new List<Item>();
         public enum PurchaseResult { SUCCESS, INSUFFICIENT_FUNDS, ALREADY_OWNED, ALREADY_SOLD }
+        public enum ItemCategory { UNCATEGORISED, APPLIANCE, BOARD_GAME, FOOD }
 
-        public static Item ListItem(Item item)
+        public static Item ListItem(Item item, ItemCategory category)
         {
+            item.Category = category;
             AllItems.Add(item);
             return item;
+        }
+
+        public static List<Item> FilterItems(ItemCategory category)
+        {
+            return AllItems.Where(x => x.Category == category).ToList();
         }
 
         public static PurchaseResult PurchaseItem(int itemid, User buyer, User seller)

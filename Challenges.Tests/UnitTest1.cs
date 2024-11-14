@@ -47,7 +47,7 @@ namespace Challenges.Tests
         public void _5ItemPropertyTest()
         {
             User.ResetAccountsCount();
-            Item testItem = new Item(new User("testUser", "test1@test.com"), "test", 10, "testing it out");
+            Item testItem = new Appliance(new User("testUser", "test1@test.com"), "test", 10, "testing it out");
             testItem.Owner.Should().Be(1);
             testItem.Name.Should().Be("test");
             testItem.Price.Should().Be(10);
@@ -70,13 +70,14 @@ namespace Challenges.Tests
         [Test]
         public void _6ListItemTest()
         {
+            Market.AllItems.Clear();
             User testUser = new User("testUser", "test@northcoders.com");
 
-            Item firstItem = Market.ListItem(new Item(testUser, "newTestItem", 20, "test description1"));
+            Item firstItem = Market.ListItem(new BoardGame(testUser, "newTestItem", 20, "test description1"), Market.ItemCategory.BOARD_GAME);
             Item firstItemForSale = Market.AllItems[0];
             firstItemForSale.Should().Be(firstItem);
 
-            Item secondItem = Market.ListItem(new Item(testUser, "newTestItem2", 20, "test description2"));
+            Item secondItem = Market.ListItem(new Food(testUser, "newTestItem2", 20, "test description2"), Market.ItemCategory.FOOD);
             Item secondItemForSale = Market.AllItems[1];
             secondItemForSale.Should().Be(secondItem);
         }
@@ -88,7 +89,7 @@ namespace Challenges.Tests
             User buyer = new User("testUser1", "test@northcoders.com");
             User seller = new User("testUser2", "test@northcoders.com");
             buyer.UpdateBalance(50);
-            Market.ListItem(new Item(seller, "newTestItem", 20, "test description1"));
+            Market.ListItem(new Food(seller, "newTestItem", 20, "test description1"), Market.ItemCategory.FOOD);
             Item testItem = Market.AllItems[0];
             Market.PurchaseItem(testItem, buyer, seller).Should().Be(Market.PurchaseResult.SUCCESS);
             buyer.Balance.Should().Be(30);
@@ -99,7 +100,7 @@ namespace Challenges.Tests
         public void _9PurchaseItemWithoutFundsTest()
         {
             User seller = new User("testUser1", "test1@northcoders.com");
-            Item item = Market.ListItem(new Item(seller, "newTestItem", 20, "test description1"));
+            Item item = Market.ListItem(new Food(seller, "newTestItem", 20, "test description1"), Market.ItemCategory.FOOD);
 
             User buyer = new User("testUser2", "test2@northcoders.com");
 
@@ -116,7 +117,7 @@ namespace Challenges.Tests
         {
             User seller = new User("testUser1", "test1@northcoders.com");
             seller.UpdateBalance(50);
-            Item item = Market.ListItem(new Item(seller, "newTestItem", 20, "test description1"));
+            Item item = Market.ListItem(new Food(seller, "newTestItem", 20, "test description1"), Market.ItemCategory.FOOD);
             Market.PurchaseItem(item, seller, seller).Should().Be(Market.PurchaseResult.ALREADY_OWNED);
         }
 
@@ -126,7 +127,7 @@ namespace Challenges.Tests
             User buyer = new User("testbuyer", "testbuyeremail1@test.com");
             buyer.UpdateBalance(50);
             User seller = new User("testseller", "testselleremail1@test.com");
-            Item item = Market.ListItem(new Item(seller, "newTestItem", 10, "description"));
+            Item item = Market.ListItem(new Appliance(seller, "newTestItem", 10, "description"), Market.ItemCategory.APPLIANCE);
             Market.PurchaseItem(item, buyer, seller);
             Market.AllItems.Should().NotContain(item);
         }
@@ -147,9 +148,9 @@ namespace Challenges.Tests
         public void _12ItemIdTest()
         {
             Item.ResetItemsCount();
-            Item item1 = new Item(new User("test1", "test1@test.com"), "nametest1", 12, "test1@test.com");
-            Item item2 = new Item(new User("test2", "test2@test.com"), "nametest2", 12, "test2@test.com");
-            Item item3 = new Item(new User("test3", "test3@test.com"), "nametest3", 12, "test3@test.com");
+            Food item1 = new Food(new User("test1", "test1@test.com"), "nametest1", 12, "test1@test.com");
+            Food item2 = new Food(new User("test2", "test2@test.com"), "nametest2", 12, "test2@test.com");
+            Food item3 = new Food(new User("test3", "test3@test.com"), "nametest3", 12, "test3@test.com");
 
             item1.ItemId.Should().Be(1);
             item2.ItemId.Should().Be(2);
@@ -160,10 +161,32 @@ namespace Challenges.Tests
         public void _13ItemOwnerTest()
         {
             User.ResetAccountsCount();
-            Item item1 = new Item(new User("test1", "test1@test.com"), "nametest1", 12, "test1@test.com");
+            Appliance item1 = new Appliance(new User("test1", "test1@test.com"), "nametest1", 12, "test1@test.com");
             item1.Owner.Should().Be(1);
-            Item item2 = new Item(new User("test2", "test2@test.com"), "nametest2", 12, "test2@test.com");
+            Appliance item2 = new Appliance(new User("test2", "test2@test.com"), "nametest2", 12, "test2@test.com");
             item2.Owner.Should().Be(2);
+        }
+
+        [Test]
+        public void _15ItemFilterTest()
+        {
+            User.ResetAccountsCount();
+            Item.ResetItemsCount();
+            Appliance app1 = new Appliance(new User("test1", "test1@test.com"), "nametest1", 12, "test1@test.com");
+            Appliance app2 = new Appliance(new User("test2", "email2@email.com"), "app2", 42, "appliance 2");
+            Food food = new Food(new User("test3", "test3@test.com"), "nametest3", 12, "test3@test.com");
+            Food food2 = new Food(new User("test4", "test3@test.com"), "nametest3", 12, "test3@test.com");
+            Food food3 = new Food(new User("test5", "test3@test.com"), "nametest3", 12, "test3@test.com");
+            BoardGame bg = new BoardGame(new User("test2", "email2@email.com"), "bg1", 23, "bg1 test");
+            Market.ListItem(app1, Market.ItemCategory.APPLIANCE);
+            Market.ListItem(app2, Market.ItemCategory.APPLIANCE);
+            Market.ListItem(food, Market.ItemCategory.FOOD);
+            Market.ListItem(food2, Market.ItemCategory.FOOD);
+            Market.ListItem(food3, Market.ItemCategory.FOOD);
+            Market.ListItem(bg, Market.ItemCategory.BOARD_GAME);
+            Market.FilterItems(Market.ItemCategory.FOOD)[0].Should().Be(food);
+            Market.FilterItems(Market.ItemCategory.BOARD_GAME)[0].Should().Be(bg);
+            Market.FilterItems(Market.ItemCategory.APPLIANCE)[1].Should().Be(app2);
         }
 
     }

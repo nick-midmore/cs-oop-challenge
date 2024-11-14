@@ -8,13 +8,14 @@ using Humanizer;
 
 namespace Challenges
 {
-    public class Item
+    public abstract class Item
     {
         public int ItemId { get; }
         public int Owner { get; private set; }
         public string Name { get; set; }
         public int Price { get; set; }
         public string Description { get; set; }
+        public Market.ItemCategory Category { get; set; } = Market.ItemCategory.UNCATEGORISED;
         public DateTime DateListed { get; }
         public static int ItemsCreated { get; private set; }
 
